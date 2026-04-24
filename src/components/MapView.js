@@ -1,18 +1,31 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import { Geolocation } from '@capacitor/geolocation';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-export default function MapView() {
+export default forwardRef(function MapView({ places = [] }, ref) {
   const mapContainer = useRef(null);
   const map = useRef(null);
+  const markers = useRef([]);
+
+  useImperativeHandle(ref, () => ({
+    flyTo: (lng, lat) => {
+      if (map.current) {
+        map.current.flyTo({
+          center: [lng, lat],
+          zoom: 16,
+          essential: true
+        });
+      }
+    }
+  }));
 
   useEffect(() => {
     if (map.current) return;
 
-    // Initialize map with a default view
+    // Initialize map
     map.current = new maplibregl.Map({
       container: mapContainer.current,
       style: {
@@ -20,9 +33,7 @@ export default function MapView() {
         sources: {
           'osm': {
             type: 'raster',
-            tiles: [
-              'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-            ],
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
             tileSize: 256,
             attribution: '&copy; OpenStreetMap contributors'
           }
@@ -42,36 +53,17 @@ export default function MapView() {
       attributionControl: false
     });
 
-    map.current.addControl(new maplibregl.NavigationControl({
-        showCompass: false
-    }), 'bottom-right');
-    
-    const geolocateControl = new maplibregl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true
-    });
-    
-    map.current.addControl(geolocateControl, 'bottom-right');
+    map.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 
-    // Request permission and center map right away
     const setupLocation = async () => {
       try {
-        const permissions = await Geolocation.checkPermissions();
-        if (permissions.location !== 'granted') {
-          await Geolocation.requestPermissions();
-        }
-        
-        const coordinates = await Geolocation.getCurrentPosition();
-        if (coordinates && map.current) {
+        const coords = await Geolocation.getCurrentPosition();
+        if (coords && map.current) {
           map.current.flyTo({
-            center: [coordinates.coords.longitude, coordinates.coords.latitude],
+            center: [coords.coords.longitude, coords.coords.latitude],
             zoom: 14,
             essential: true
           });
-          
-          // Trigger the geolocate control UI state if possible
-          // Note: maplibregl doesn't have a direct "trigger" method that is public for the dot, 
-          // but we've centered the map which is the main goal.
         }
       } catch (error) {
         console.error('Error getting location:', error);
@@ -88,7 +80,26 @@ export default function MapView() {
     };
   }, []);
 
+  // Update markers when places change
+  useEffect(() => {
+    if (!map.current) return;
+
+    // Remove existing markers
+    markers.current.forEach(marker => marker.remove());
+    markers.current = [];
+
+    // Add new markers
+    places.forEach(place => {
+      if (place.latitude && place.longitude) {
+        const marker = new maplibregl.Marker()
+          .setLngLat([place.longitude, place.latitude])
+          .addTo(map.current);
+        markers.current.push(marker);
+      }
+    });
+  }, [places]);
+
   return (
     <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
   );
-}
+});
