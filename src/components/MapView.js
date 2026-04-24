@@ -88,8 +88,11 @@ export default forwardRef(function MapView({ places = [] }, ref) {
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
 
+    // Ensure places is an array
+    const placesArray = Array.isArray(places) ? places : [];
+
     // Add new markers
-    places.forEach(place => {
+    placesArray.forEach(place => {
       if (place.latitude && place.longitude) {
         const marker = new maplibregl.Marker()
           .setLngLat([place.longitude, place.latitude])
