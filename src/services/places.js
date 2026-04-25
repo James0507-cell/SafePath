@@ -29,4 +29,3 @@ export async function fetchPlaces(
     const data = await response.json();
     return data.results || [];
 }
-

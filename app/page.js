@@ -123,7 +123,7 @@ export default function DashboardPage() {
             } else {
                 setPlaces((prev) => dedupePlacesById([...prev, ...results]));
             }
-            
+
             setHasMore(results.length > 0);
             setCurrentPage(page);
         } catch (err) {
@@ -265,7 +265,11 @@ export default function DashboardPage() {
                                     <div className="flex flex-col gap-6">
                                         {selectedPlace.image_url && (
                                             <div className="w-full shrink-0">
-                                                <img src={selectedPlace.image_url} className="w-full h-auto object-contain rounded" />
+                                                <img
+                                                    src={selectedPlace.image_url}
+                                                    alt={selectedPlace.name}
+                                                    className="w-full h-auto object-contain rounded"
+                                                />
                                             </div>
                                         )}
                                         <div className="flex-1 flex flex-col gap-4">
@@ -325,7 +329,7 @@ export default function DashboardPage() {
                                                                 <span className="font-medium text-slate-900">{review.author}</span>
                                                                 <span className="text-slate-500">{review.rating}/5</span>
                                                             </div>
-                                                            <p className="text-xs text-slate-600 italic">"{review.text}"</p>
+                                                            <p className="text-xs text-slate-600 italic">&quot;{review.text}&quot;</p>
                                                         </div>
                                                     ))}
                                                 </div>

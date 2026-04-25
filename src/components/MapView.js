@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
-import maplibregl from 'maplibre-gl';
+import mapboxgl from 'mapbox-gl';
 import { Geolocation } from '@capacitor/geolocation';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCCESS_TOKEN;
 
 export default forwardRef(function MapView({ places = [] }, ref) {
   const mapContainer = useRef(null);
@@ -26,34 +28,15 @@ export default forwardRef(function MapView({ places = [] }, ref) {
     if (map.current) return;
 
     // Initialize map
-    map.current = new maplibregl.Map({
+    map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: {
-        version: 8,
-        sources: {
-          'osm': {
-            type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            tileSize: 256,
-            attribution: '&copy; OpenStreetMap contributors'
-          }
-        },
-        layers: [
-          {
-            id: 'osm-layer',
-            type: 'raster',
-            source: 'osm',
-            minzoom: 0,
-            maxzoom: 19
-          }
-        ]
-      },
+      style: 'mapbox://styles/mapbox/streets-v12',
       center: [0, 0],
       zoom: 2,
       attributionControl: false
     });
 
-    map.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+    map.current.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
 
     const setupLocation = async () => {
       try {
@@ -94,7 +77,7 @@ export default forwardRef(function MapView({ places = [] }, ref) {
     // Add new markers
     placesArray.forEach(place => {
       if (place.latitude && place.longitude) {
-        const marker = new maplibregl.Marker()
+        const marker = new mapboxgl.Marker()
           .setLngLat([place.longitude, place.latitude])
           .addTo(map.current);
         markers.current.push(marker);
