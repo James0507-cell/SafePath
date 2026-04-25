@@ -1,13 +1,67 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  Fraunces,
+  Cormorant_Garamond,
+  DM_Serif_Display,
+  Geist_Mono,
+  IBM_Plex_Sans,
+  Manrope,
+  Newsreader,
+  Outfit,
+  Space_Grotesk,
+  Source_Sans_3,
+} from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const displaySerif = Cormorant_Garamond({
+  variable: "--font-display-serif",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const uiSans = Manrope({
+  variable: "--font-ui-sans",
   subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const displayAccent = DM_Serif_Display({
+  variable: "--font-display-accent",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+});
+
+const sourceSans = Source_Sans_3({
+  variable: "--font-source-sans",
+  subsets: ["latin"],
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+});
+
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-ibm-plex-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
 });
 
@@ -20,7 +74,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${displaySerif.variable} ${uiSans.variable} ${geistMono.variable} ${displayAccent.variable} ${spaceGrotesk.variable} ${sourceSans.variable} ${fraunces.variable} ${outfit.variable} ${ibmPlexSans.variable} ${newsreader.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

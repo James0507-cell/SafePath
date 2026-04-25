@@ -2,15 +2,18 @@
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import mapboxgl from 'mapbox-gl';
+import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions';
 import { Geolocation } from '@capacitor/geolocation';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions.css';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCCESS_TOKEN;
 
-export default forwardRef(function MapView({ places = [] }, ref) {
+export default forwardRef(function MapView({ places = [], onRouteUpdate }, ref) {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const markers = useRef([]);
+  const directions = useRef(null);
 
   useImperativeHandle(ref, () => ({
     flyTo: (lng, lat) => {
@@ -20,6 +23,20 @@ export default forwardRef(function MapView({ places = [] }, ref) {
           zoom: 16,
           essential: true
         });
+      }
+    },
+    setRoute: (destinationLat, destinationLng) => {
+      if (directions.current && map.current) {
+        const setDirections = async () => {
+          try {
+            const coords = await Geolocation.getCurrentPosition();
+            directions.current.setOrigin([coords.coords.longitude, coords.coords.latitude]);
+            directions.current.setDestination([destinationLng, destinationLat]);
+          } catch (error) {
+            console.error('Error getting location for routing:', error);
+          }
+        };
+        setDirections();
       }
     }
   }));
@@ -36,6 +53,14 @@ export default forwardRef(function MapView({ places = [] }, ref) {
       attributionControl: false
     });
 
+    // Initialize Directions
+    directions.current = new MapboxDirections({
+      accessToken: mapboxgl.accessToken,
+      unit: 'metric',
+      profile: 'mapbox/driving'
+    });
+
+    map.current.addControl(directions.current, 'top-right');
     map.current.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
 
     const setupLocation = async () => {

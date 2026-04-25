@@ -7,19 +7,14 @@ import {
     Rss,
     Calendar,
     Settings,
-    LogOut,
     Shield,
     Search,
-    Bell,
-    User,
     Star,
     MapPin,
     Clock,
     Phone,
     Globe,
-    X,
-    Maximize2,
-    Minimize2
+    X
 } from 'lucide-react';
 import { createClient } from '@/src/lib/supabaseClient';
 import MapView from '@/src/components/MapView';
@@ -42,23 +37,30 @@ export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState('maps');
     const [user, setUser] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [hasSearched, setHasSearched] = useState(false);
     const [places, setPlaces] = useState([]);
     const [selectedPlace, setSelectedPlace] = useState(null);
     const [activeDetailTab, setActiveDetailTab] = useState('overview');
+    const [routeData, setRouteData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
-    
+
     const resultsEndRef = useRef(null);
     const isLoadingRef = useRef(false);
     const mapRef = useRef(null);
     const router = useRouter();
     const supabase = createClient();
-    const hasResultsPanel = places.length > 0;
+    const showResultsPanel = hasSearched || isLoading;
+
+    // Reset route data when a new place is selected or searched
+    useEffect(() => {
+        setRouteData(null);
+    }, [selectedPlace]);
 
     useEffect(() => {
         if (!hasMore || isLoading) return;
-
+        // ... rest of observer logic
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && !isLoadingRef.current) {
@@ -90,17 +92,10 @@ export default function DashboardPage() {
         return () => subscription?.unsubscribe();
     }, [router, supabase]);
 
-    const handleLogout = async () => {
-        try {
-            await supabase.auth.signOut();
-        } catch (err) {
-            console.error('Error logging out:', err);
-        }
-    };
-
     const handleSearch = async (e, page = 1) => {
         if (e) {
             e.preventDefault();
+            setHasSearched(true);
             setPlaces([]);
             setCurrentPage(1);
             setHasMore(true);
@@ -141,6 +136,60 @@ export default function DashboardPage() {
         { id: 'settings', label: 'Settings', icon: Settings },
     ];
 
+    const panelFontFamilies = {
+        editorial: 'var(--font-display-serif), Georgia, serif',
+        refined: 'var(--font-ui-sans), system-ui, sans-serif',
+        technical: 'var(--font-geist-mono), monospace',
+        gallery: 'var(--font-display-accent), var(--font-display-serif), serif',
+        modernist: 'var(--font-space-grotesk), var(--font-ui-sans), sans-serif',
+        humanist: 'var(--font-source-sans), var(--font-ui-sans), sans-serif',
+        luxury: 'var(--font-fraunces), var(--font-display-serif), serif',
+        bookish: 'var(--font-newsreader), var(--font-display-serif), serif',
+        civic: 'var(--font-ibm-plex-sans), var(--font-ui-sans), sans-serif',
+        clean: 'var(--font-outfit), var(--font-ui-sans), sans-serif',
+    };
+
+    const panelFontStyle = 'bookish';
+    const panelRadius = 30;
+    const panelOpacity = 0.82;
+    const panelShadow = 'medium';
+
+    const panelShadowStyles = {
+        soft: '0 14px 36px rgba(15,23,42,0.12)',
+        medium: '0 22px 60px rgba(15,23,42,0.18)',
+        dramatic: '0 30px 90px rgba(15,23,42,0.28)',
+    };
+
+    const panelThemeVars = {
+        '--panel-radius': `${panelRadius}px`,
+        '--panel-card-radius': `${Math.max(panelRadius - 6, 16)}px`,
+        '--panel-pill-radius': `${Math.max(panelRadius - 12, 14)}px`,
+        '--panel-font-family': panelFontFamilies[panelFontStyle],
+        '--panel-surface': `rgba(255,255,255,${panelOpacity})`,
+        '--panel-border': `rgba(255,255,255,${Math.min(panelOpacity + 0.06, 0.94)})`,
+        '--panel-shadow': panelShadowStyles[panelShadow],
+        '--panel-blur': 'blur(22px)',
+    };
+
+    const panelShellStyle = {
+        ...panelThemeVars,
+        fontFamily: 'var(--panel-font-family)',
+        borderRadius: 'var(--panel-radius)',
+        backgroundColor: 'var(--panel-surface)',
+        borderColor: 'var(--panel-border)',
+        boxShadow: 'var(--panel-shadow)',
+        backdropFilter: 'var(--panel-blur)',
+        WebkitBackdropFilter: 'var(--panel-blur)',
+    };
+
+    const panelCardStyle = {
+        borderRadius: 'var(--panel-card-radius)',
+    };
+
+    const panelPillStyle = {
+        borderRadius: 'var(--panel-pill-radius)',
+    };
+
     return (
         <div className="flex flex-col md:flex-row h-[100dvh] bg-white text-slate-800 font-sans overflow-hidden">
             <aside className="hidden md:flex w-[72px] flex-col bg-white border-r border-slate-200 shrink-0 z-30">
@@ -159,221 +208,362 @@ export default function DashboardPage() {
 
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
                 <header className="h-16 bg-white border-b border-slate-200 flex items-center px-4 justify-between shrink-0 z-20">
-                    <form onSubmit={handleSearch} className="flex-1 max-w-md">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                            <input
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                type="text"
-                                placeholder="Search locations..."
-                                className="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-2 rounded-xl text-sm focus:outline-hidden"
-                            />
-                        </div>
-                    </form>
+                    <div className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">Control Map</div>
                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold">{user?.email?.charAt(0).toUpperCase()}</div>
                 </header>
 
-                <main className="flex-1 flex flex-row bg-slate-50 overflow-hidden font-sans">
+                <main className="relative flex-1 overflow-hidden bg-slate-100 font-sans">
+                    <div className="absolute inset-0">
+                        <MapView ref={mapRef} places={places} />
+                    </div>
 
-                    {/* Search Results Panel */}
-                    <div className={`${hasResultsPanel ? 'w-[400px]' : 'w-0'} h-full bg-white border-r border-slate-200 overflow-y-auto z-40 shrink-0`}>
-                        <div className="p-4 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white">
-                            <h2 className="font-bold text-sm text-slate-900">Results</h2>
-                            <button onClick={() => { setPlaces([]); setSelectedPlace(null); }} className="text-slate-400 hover:text-slate-600">
-                                <X size={16} />
-                            </button>
-                        </div>
-                        {Array.isArray(places) && places.map((place, idx) => (
-                            <div key={idx} onClick={() => {
-                                setSelectedPlace(place);
-                                if (mapRef.current && place.latitude && place.longitude) {
-                                    mapRef.current.flyTo(place.longitude, place.latitude);
-                                }
-                                setActiveDetailTab('overview');
-                            }} className={`flex gap-4 p-4 border-b border-slate-100 hover:bg-slate-50 cursor-pointer ${selectedPlace?.name === place.name ? 'bg-slate-50' : ''}`}>
-                                {place.image_url && (
-                                    <img src={place.image_url} alt={place.name} className="w-20 h-20 object-cover rounded shrink-0" />
-                                )}
-                                <div className="min-w-0 flex-1">
-                                    <h3 className="font-bold text-sm truncate">{place.name}</h3>
-                                    {place.category && (
-                                        <span className="inline-block bg-slate-100 text-slate-600 text-[10px] px-1.5 py-0.5 rounded font-medium mb-1">
-                                            {place.category}
-                                        </span>
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.48),_transparent_28%),linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.16))]" />
+
+                    {/* Search and Results Panel */}
+                    <div className={`pointer-events-none absolute inset-x-3 top-3 z-40 transition-all duration-300 ${showResultsPanel ? (selectedPlace ? 'bottom-[calc(48%+0.75rem)] md:bottom-4 md:left-4 md:w-[390px]' : 'bottom-3 md:bottom-4 md:left-4 md:w-[390px]') : 'md:left-4 md:w-[390px]'}`}>
+                        <div className={`pointer-events-auto flex flex-col overflow-hidden border backdrop-blur-xl transition-all duration-300 ${showResultsPanel ? 'h-full min-h-0' : ''}`} style={panelShellStyle}>
+                            <div className="border-b border-slate-200/70 px-5 py-4">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div>
+                                        <h2 className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">Search</h2>
+                                        <p className="mt-1 text-xs text-slate-500">
+                                            {showResultsPanel ? 'Refine your search and browse nearby matches.' : 'Search for locations and expand this panel into results.'}
+                                        </p>
+                                    </div>
+                                    {showResultsPanel && (
+                                        <button
+                                            onClick={() => {
+                                                setHasSearched(false);
+                                                setPlaces([]);
+                                                setSelectedPlace(null);
+                                                setCurrentPage(1);
+                                                setHasMore(true);
+                                            }}
+                                            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/80 bg-white/80 text-slate-400 transition hover:text-slate-700"
+                                        >
+                                            <X size={16} />
+                                        </button>
                                     )}
-                                    <p className="text-xs text-slate-500 truncate">{place.address}</p>
-                                    <div className="flex flex-col gap-1 mt-2 text-xs text-slate-600">
-                                        {place.rating && (
-                                            <div className="flex items-center gap-0.5">
-                                                {[1, 2, 3, 4, 5].map((star) => (
-                                                    <Star
-                                                        key={star}
-                                                        size={12}
-                                                        className={star <= Math.round(place.rating) ? "text-yellow-500 fill-yellow-500" : "text-slate-300"}
-                                                    />
-                                                ))}
-                                                <span className="ml-1 text-slate-600">{place.rating}</span>
-                                            </div>
-                                        )}
-                                        <div className="flex items-center gap-1.5">
-                                            <Clock size={12} className="text-slate-400" />
-                                            <span className="truncate">{place.hours}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <Phone size={12} className="text-slate-400" />
-                                            <span className="truncate">{place.phone || 'N/A'}</span>
+                                </div>
+
+                                <form onSubmit={handleSearch} className="mt-4">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                        <input
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            type="text"
+                                            placeholder="Search locations..."
+                                            className="w-full border border-slate-200/80 bg-white/80 pl-10 pr-24 py-3 text-sm text-slate-800 shadow-[0_10px_28px_rgba(15,23,42,0.06)] focus:outline-hidden"
+                                            style={panelPillStyle}
+                                        />
+                                        <button
+                                            type="submit"
+                                            aria-label="Search locations"
+                                            className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center bg-slate-900 text-white transition hover:bg-slate-800"
+                                            style={panelPillStyle}
+                                        >
+                                            <Search size={16} />
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            {showResultsPanel && (
+                                <>
+                                    <div className="flex items-center justify-between border-b border-slate-200/70 px-5 py-4">
+                                        <div>
+                                            <h2 className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">Results</h2>
+                                            <p className="mt-1 text-xs text-slate-500">{places.length} places found</p>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        ))}
-                        <div ref={resultsEndRef} className="h-4" />
-                        {isLoading && (
-                            <div className="p-4 text-center text-xs text-slate-400">Loading more...</div>
-                        )}
+
+                                    <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 overscroll-contain">
+                                        {places.length > 0 ? (
+                                            <div className="flex flex-col gap-3">
+                                                {Array.isArray(places) && places.map((place, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        onClick={() => {
+                                                            setSelectedPlace(place);
+                                                            if (mapRef.current && place.latitude && place.longitude) {
+                                                                mapRef.current.flyTo(place.longitude, place.latitude);
+                                                            }
+                                                            setActiveDetailTab('overview');
+                                                        }}
+                                                        className={`group cursor-pointer rounded-[24px] border p-3 transition duration-200 ${
+                                                            selectedPlace?.name === place.name
+                                                                ? 'border-slate-900/10 bg-slate-900 text-white shadow-[0_18px_40px_rgba(15,23,42,0.24)]'
+                                                                : 'border-white/70 bg-white/80 text-slate-900 shadow-[0_12px_30px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:bg-white'
+                                                        }`}
+                                                        style={panelCardStyle}
+                                                    >
+                                                        <div className="flex gap-3">
+                                                            {place.image_url && (
+                                                                <img src={place.image_url} alt={place.name} className="h-24 w-24 shrink-0 object-cover" style={{ borderRadius: 'calc(var(--panel-card-radius) - 6px)' }} />
+                                                            )}
+                                                            <div className="min-w-0 flex-1">
+                                                                <div className="flex items-start justify-between gap-3">
+                                                                    <div className="min-w-0">
+                                                                        <h3 className="truncate text-sm font-bold">{place.name}</h3>
+                                                                        {place.category && (
+                                                                            <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${
+                                                                                selectedPlace?.name === place.name
+                                                                                    ? 'bg-white/14 text-white/75'
+                                                                                    : 'bg-slate-100 text-slate-600'
+                                                                            }`}>
+                                                                                {place.category}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    {place.rating && (
+                                                                        <div className={`px-2 py-1 text-[11px] font-semibold ${
+                                                                            selectedPlace?.name === place.name
+                                                                                ? 'bg-white/14 text-white'
+                                                                                : 'bg-amber-50 text-amber-700'
+                                                                        }`} style={panelPillStyle}>
+                                                                            {place.rating}
+                                                                        </div>
+                                                                    )}
+                                                                    </div>
+                                                                    <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        if (mapRef.current && place.latitude && place.longitude) {
+                                                                            mapRef.current.setRoute(place.latitude, place.longitude);
+                                                                        }
+                                                                    }}
+                                                                    className={`mt-3 inline-flex rounded-full px-4 py-1.5 text-[11px] font-semibold tracking-wide transition ${
+                                                                        selectedPlace?.name === place.name
+                                                                            ? 'bg-white/20 text-white hover:bg-white/30'
+                                                                            : 'bg-slate-900 text-white hover:bg-slate-700'
+                                                                    }`}
+                                                                    >
+                                                                    Directions
+                                                                    </button>
+
+                                                                    <p className={`mt-2 line-clamp-2 text-xs ${selectedPlace?.name === place.name ? 'text-white/75' : 'text-slate-500'}`}>
+                                                                    {place.address}
+                                                                    </p>
+                                                                <div className={`mt-3 grid grid-cols-1 gap-2 text-xs ${selectedPlace?.name === place.name ? 'text-white/80' : 'text-slate-600'}`}>
+                                                                    {place.rating && (
+                                                                        <div className="flex items-center gap-1">
+                                                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                                                <Star
+                                                                                    key={star}
+                                                                                    size={12}
+                                                                                    className={star <= Math.round(place.rating)
+                                                                                        ? 'fill-yellow-400 text-yellow-400'
+                                                                                        : selectedPlace?.name === place.name
+                                                                                            ? 'text-white/25'
+                                                                                            : 'text-slate-300'}
+                                                                                />
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Clock size={12} className={selectedPlace?.name === place.name ? 'text-white/50' : 'text-slate-400'} />
+                                                                        <span className="truncate">{place.hours}</span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Phone size={12} className={selectedPlace?.name === place.name ? 'text-white/50' : 'text-slate-400'} />
+                                                                        <span className="truncate">{place.phone || 'N/A'}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : !isLoading ? (
+                                            <div className="border border-dashed border-slate-200/80 bg-white/55 px-4 py-6 text-center text-sm text-slate-500" style={panelCardStyle}>
+                                                No places found. Try a broader location or different keyword.
+                                            </div>
+                                        ) : null}
+
+                                        <div ref={resultsEndRef} className="h-4" />
+                                        {isLoading && (
+                                            <div className="flex items-center justify-center py-5">
+                                                <div className="flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2 shadow-[0_10px_28px_rgba(15,23,42,0.08)]" style={panelPillStyle}>
+                                                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />
+                                                    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Loading</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
 
                     {/* Detailed Place Panel */}
                     {selectedPlace && (
-                        <div className="w-[450px] h-full bg-white border-r border-slate-200 flex flex-col z-50 overflow-hidden shrink-0 transition-all duration-300">
-                            <div className="p-4 border-b border-slate-100 flex justify-between items-center">
-                                <h2 className="font-bold text-lg">Details</h2>
-                                <button onClick={() => setSelectedPlace(null)} className="text-slate-400 hover:text-slate-600">
-                                    <X size={20} />
-                                </button>
-                            </div>
+                        <div className="pointer-events-none absolute inset-x-3 bottom-3 top-[45%] z-50 md:inset-x-auto md:bottom-4 md:left-[418px] md:top-4 md:w-[440px]">
+                            <div className="pointer-events-auto flex h-full flex-col overflow-hidden border backdrop-blur-xl" style={panelShellStyle}>
+                                <div className="flex items-center justify-between border-b border-slate-200/70 px-5 py-4">
+                                    <div>
+                                        <h2 className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">Details</h2>
+                                        <p className="mt-1 text-sm font-semibold text-slate-900">{selectedPlace.name}</p>
+                                    </div>
+                                    <button onClick={() => setSelectedPlace(null)} className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-400 transition hover:text-slate-700">
+                                        <X size={18} />
+                                    </button>
+                                </div>
 
-                            {/* Tabs */}
-                            <div className="flex border-b border-slate-100">
-                                <button
-                                    onClick={() => setActiveDetailTab('overview')}
-                                    className={`flex-1 py-3 text-sm font-semibold ${activeDetailTab === 'overview' ? 'text-slate-900 border-b-2 border-slate-900' : 'text-slate-500'}`}
-                                >
-                                    Overview
-                                </button>
-                                <button
-                                    onClick={() => setActiveDetailTab('about')}
-                                    className={`flex-1 py-3 text-sm font-semibold ${activeDetailTab === 'about' ? 'text-slate-900 border-b-2 border-slate-900' : 'text-slate-500'}`}
-                                >
-                                    About
-                                </button>
-                            </div>
+                                <div className="px-4 pt-4">
+                                    <div className="inline-flex border border-slate-200 bg-slate-100/80 p-1" style={panelPillStyle}>
+                                        <button
+                                            onClick={() => setActiveDetailTab('overview')}
+                                            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                                                activeDetailTab === 'overview'
+                                                    ? 'bg-slate-900 text-white shadow-sm'
+                                                    : 'text-slate-500'
+                                            }`}
+                                            style={panelPillStyle}
+                                        >
+                                            Overview
+                                        </button>
+                                        <button
+                                            onClick={() => setActiveDetailTab('about')}
+                                            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                                                activeDetailTab === 'about'
+                                                    ? 'bg-slate-900 text-white shadow-sm'
+                                                    : 'text-slate-500'
+                                            }`}
+                                            style={panelPillStyle}
+                                        >
+                                            About
+                                        </button>
+                                    </div>
+                                </div>
 
-                            <div className="overflow-y-auto p-6 flex flex-col gap-6">
-                                {activeDetailTab === 'overview' ? (
-                                    <div className="flex flex-col gap-6">
-                                        {selectedPlace.image_url && (
-                                            <div className="w-full shrink-0">
-                                                <img
-                                                    src={selectedPlace.image_url}
-                                                    alt={selectedPlace.name}
-                                                    className="w-full h-auto object-contain rounded"
-                                                />
-                                            </div>
-                                        )}
-                                        <div className="flex-1 flex flex-col gap-4">
-                                            <div>
-                                                <h1 className="text-2xl font-semibold text-slate-900">{selectedPlace.name}</h1>
-                                                {selectedPlace.category && (
-                                                    <span className="inline-block bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded font-medium mt-1">
-                                                        {selectedPlace.category}
-                                                    </span>
-                                                )}
-                                                <p className="text-slate-500 mt-1">{selectedPlace.address}</p>
-                                            </div>
-                                            <div className="flex flex-col gap-3 text-sm text-slate-600">
-                                                {selectedPlace.rating && (
-                                                    <div className="flex items-center gap-3">
-                                                        <Star size={16} className="text-slate-400" />
-                                                        <span>{selectedPlace.rating} out of 5</span>
-                                                    </div>
-                                                )}
-                                                <div className="flex items-center gap-3">
-                                                    <Phone size={16} className="text-slate-400" />
-                                                    <span>{selectedPlace.phone || 'No phone number available'}</span>
+                                <div className="overflow-y-auto px-5 py-5">
+                                    {activeDetailTab === 'overview' ? (
+                                        <div className="flex flex-col gap-5">
+                                            {selectedPlace.image_url && (
+                                                <div className="overflow-hidden border border-white/70 bg-slate-100 shadow-[0_18px_40px_rgba(15,23,42,0.08)]" style={panelCardStyle}>
+                                                    <img
+                                                        src={selectedPlace.image_url}
+                                                        alt={selectedPlace.name}
+                                                        className="h-56 w-full object-cover"
+                                                    />
                                                 </div>
-                                                <div className="flex items-center gap-3">
-                                                    <Clock size={16} className="text-slate-400" />
-                                                    <span>{selectedPlace.hours}</span>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <MapPin size={16} className="text-slate-400" />
-                                                    <span className="font-mono text-xs">{selectedPlace.plus_code || 'N/A'}</span>
-                                                </div>
-                                                {selectedPlace.latitude && selectedPlace.longitude && (
-                                                    <div className="flex items-center gap-3">
-                                                        <MapPin size={16} className="text-slate-400" />
-                                                        <span className="text-sm font-mono">
-                                                            {typeof selectedPlace.latitude === 'number' ? selectedPlace.latitude.toFixed(6) : selectedPlace.latitude}, 
-                                                            {typeof selectedPlace.longitude === 'number' ? selectedPlace.longitude.toFixed(6) : selectedPlace.longitude}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {selectedPlace.website && (
-                                                <a href={selectedPlace.website} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-slate-600 hover:text-blue-600 transition-colors">
-                                                    <Globe size={16} className="text-slate-400" />
-                                                    <span className="text-sm">Visit website</span>
-                                                </a>
                                             )}
-                                            <div className="border-t border-slate-100 mt-4 pt-4">
-                                                <h3 className="font-semibold text-slate-900 mb-3">Reviews</h3>
-                                                <div className="flex flex-col gap-4">
+
+                                            <div className="border border-white/70 bg-white/70 p-5 shadow-[0_16px_35px_rgba(15,23,42,0.06)]" style={panelCardStyle}>
+                                                <div className="flex flex-col gap-3">
+                                                    <div>
+                                                        <h1 className="text-2xl font-semibold text-slate-900">{selectedPlace.name}</h1>
+                                                        {selectedPlace.category && (
+                                                            <span className="mt-2 inline-flex bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-600" style={panelPillStyle}>
+                                                                {selectedPlace.category}
+                                                            </span>
+                                                        )}
+                                                        <p className="mt-3 text-sm leading-6 text-slate-500">{selectedPlace.address}</p>
+                                                    </div>
+
+                                                    <div className="grid gap-3 text-sm text-slate-600">
+                                                        {selectedPlace.rating && (
+                                                            <div className="flex items-center gap-3 bg-slate-50 px-4 py-3" style={panelPillStyle}>
+                                                                <Star size={16} className="text-amber-500" />
+                                                                <span>{selectedPlace.rating} out of 5</span>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex items-center gap-3 bg-slate-50 px-4 py-3" style={panelPillStyle}>
+                                                            <Phone size={16} className="text-slate-400" />
+                                                            <span>{selectedPlace.phone || 'No phone number available'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-3 bg-slate-50 px-4 py-3" style={panelPillStyle}>
+                                                            <Clock size={16} className="text-slate-400" />
+                                                            <span>{selectedPlace.hours}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-3 bg-slate-50 px-4 py-3" style={panelPillStyle}>
+                                                            <MapPin size={16} className="text-slate-400" />
+                                                            <span className="font-mono text-xs">{selectedPlace.plus_code || 'N/A'}</span>
+                                                        </div>
+                                                        {selectedPlace.latitude && selectedPlace.longitude && (
+                                                            <div className="flex items-center gap-3 bg-slate-50 px-4 py-3" style={panelPillStyle}>
+                                                                <MapPin size={16} className="text-slate-400" />
+                                                                <span className="font-mono text-xs">
+                                                                    {typeof selectedPlace.latitude === 'number' ? selectedPlace.latitude.toFixed(6) : selectedPlace.latitude},
+                                                                    {' '}
+                                                                    {typeof selectedPlace.longitude === 'number' ? selectedPlace.longitude.toFixed(6) : selectedPlace.longitude}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {selectedPlace.website && (
+                                                        <a href={selectedPlace.website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-3 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800" style={panelPillStyle}>
+                                                            <Globe size={16} className="text-white/70" />
+                                                            <span>Visit website</span>
+                                                        </a>
+                                                    )}
+                                                    <button
+                                                        onClick={() => {
+                                                            if (mapRef.current && selectedPlace.latitude && selectedPlace.longitude) {
+                                                                mapRef.current.setRoute(selectedPlace.latitude, selectedPlace.longitude);
+                                                            }
+                                                        }}
+                                                        className="inline-flex items-center justify-center gap-3 bg-slate-100 px-4 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-200"
+                                                        style={panelPillStyle}
+                                                    >
+                                                        <MapPin size={16} className="text-slate-600" />
+                                                        <span>Show Directions</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="border border-white/70 bg-white/70 p-5 shadow-[0_16px_35px_rgba(15,23,42,0.06)]" style={panelCardStyle}>
+                                                <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Reviews</h3>
+                                                <div className="mt-4 flex flex-col gap-3">
                                                     {[
                                                         { author: 'Jane Doe', text: 'Great place, very helpful!', rating: 5 },
                                                         { author: 'John Smith', text: 'Good service, but a bit crowded.', rating: 4 },
                                                     ].map((review, i) => (
-                                                        <div key={i} className="flex flex-col gap-1">
-                                                            <div className="flex justify-between text-xs">
-                                                                <span className="font-medium text-slate-900">{review.author}</span>
-                                                                <span className="text-slate-500">{review.rating}/5</span>
+                                                        <div key={i} className="bg-slate-50 px-4 py-4" style={panelPillStyle}>
+                                                            <div className="flex items-center justify-between gap-3 text-xs">
+                                                                <span className="font-semibold text-slate-900">{review.author}</span>
+                                                                <span className="bg-white px-2.5 py-1 text-slate-500" style={panelPillStyle}>{review.rating}/5</span>
                                                             </div>
-                                                            <p className="text-xs text-slate-600 italic">&quot;{review.text}&quot;</p>
+                                                            <p className="mt-2 text-sm leading-6 text-slate-600">&quot;{review.text}&quot;</p>
                                                         </div>
                                                     ))}
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col gap-6">
-                                        {selectedPlace.about_sections ? (
-                                            Object.entries(selectedPlace.about_sections).map(([key, items], index) => (
-                                                <div key={key}>
-                                                    {index > 0 && <div className="h-px bg-slate-100 my-6" />}
-                                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-                                                        {key.replace('_', ' ')}
-                                                    </h3>
-                                                    <ul className="text-sm text-slate-800 space-y-3">
-                                                        {items.map((item, idx) => (
-                                                            <li key={idx} className="flex items-start gap-3">
-                                                                <div className="mt-0.5 shrink-0 w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center">
-                                                                    <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full" />
-                                                                </div>
-                                                                {item}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
+                                    ) : (
+                                        <div className="flex flex-col gap-4">
+                                            {selectedPlace.about_sections ? (
+                                                Object.entries(selectedPlace.about_sections).map(([key, items]) => (
+                                                    <div key={key} className="border border-white/70 bg-white/70 p-5 shadow-[0_16px_35px_rgba(15,23,42,0.06)]" style={panelCardStyle}>
+                                                        <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">
+                                                            {key.replace('_', ' ')}
+                                                        </h3>
+                                                        <ul className="mt-4 space-y-3 text-sm text-slate-800">
+                                                            {items.map((item, idx) => (
+                                                                <li key={idx} className="flex items-start gap-3">
+                                                                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                                                                        <div className="h-2 w-2 rounded-full bg-emerald-600" />
+                                                                    </div>
+                                                                    <span className="leading-6">{item}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="border border-dashed border-slate-200 bg-white/60 p-5 text-sm italic text-slate-500" style={panelCardStyle}>
+                                                    No additional information available.
                                                 </div>
-                                            ))
-                                        ) : (
-                                            <p className="text-sm text-slate-500 italic">No additional information available.</p>
-                                        )}
-                                    </div>
-                                )}
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
 
-                    <div className="flex-1 relative">
-                        <MapView ref={mapRef} places={places} />
-                        {isLoading && (
-                            <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm shadow-lg rounded-xl p-4 border border-slate-200 z-40 text-sm font-medium">
-                                Searching...
-                            </div>
-                        )}
-                    </div>
                 </main>
             </div>
         </div>
