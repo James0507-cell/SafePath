@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    Map as MapIcon,
-    Rss,
-    Calendar,
-    Settings,
+    Compass,
+    LayoutGrid,
+    CalendarRange,
+    Settings2,
     Shield,
     Search,
     Star,
@@ -133,10 +133,10 @@ export default function DashboardPage() {
     };
 
     const navItems = [
-        { id: 'maps', label: 'Maps', icon: MapIcon },
-        { id: 'feed', label: 'Feed', icon: Rss },
-        { id: 'planner', label: 'Planner', icon: Calendar },
-        { id: 'settings', label: 'Settings', icon: Settings },
+        { id: 'maps', label: 'Maps', icon: Compass },
+        { id: 'feed', label: 'Feed', icon: LayoutGrid },
+        { id: 'planner', label: 'Planner', icon: CalendarRange },
+        { id: 'settings', label: 'Settings', icon: Settings2 },
     ];
 
     const panelFontFamilies = {
@@ -195,6 +195,7 @@ export default function DashboardPage() {
 
     return (
         <div className="flex flex-col md:flex-row h-[100dvh] bg-white text-slate-800 font-sans overflow-hidden">
+            {/* Desktop Sidebar */}
             <aside className="hidden md:flex w-[72px] flex-col bg-white border-r border-slate-200 shrink-0 z-30 justify-between">
                 <div>
                     <div className="h-16 flex items-center justify-center border-b border-slate-100">
@@ -220,12 +221,40 @@ export default function DashboardPage() {
             </aside>
 
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+                {/* Mobile Header */}
+                <header className="flex md:hidden h-16 shrink-0 items-center justify-between px-4 bg-white/90 backdrop-blur-md border-b border-slate-200 z-50">
+                    <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200">
+                        <User size={18} />
+                    </div>
+                    <button className="relative text-slate-400 hover:text-slate-600 transition-colors">
+                        <Bell size={20} />
+                        <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                </header>
+
                 <main className="relative flex-1 overflow-hidden bg-slate-100 font-sans">
                     <div className="absolute inset-0">
                         <MapView ref={mapRef} places={places} />
                     </div>
 
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.48),_transparent_28%),linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.16))]" />
+
+                    {/* Mobile Floating Dock */}
+                    <nav className="fixed md:hidden bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white/80 backdrop-blur-2xl border border-white/50 p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 mb-safe" style={{ borderRadius: '20px' }}>
+                        {navItems.map((item) => (
+                            <button 
+                                key={item.id} 
+                                onClick={() => setActiveTab(item.id)} 
+                                className={`flex items-center justify-center w-11 h-11 rounded-[14px] transition-all duration-300 ${
+                                    activeTab === item.id 
+                                        ? 'bg-slate-900 text-white shadow-md' 
+                                        : 'text-slate-400 hover:bg-slate-100/50'
+                                }`}
+                            >
+                                <item.icon size={20} className={activeTab === item.id ? 'scale-105' : ''} />
+                            </button>
+                        ))}
+                    </nav>
 
                     {/* Search and Results Panel */}
                     <div className={`pointer-events-none absolute inset-x-3 top-3 z-40 transition-all duration-300 ${showResultsPanel ? (selectedPlace ? 'bottom-[calc(48%+0.75rem)] md:bottom-4 md:left-4 md:w-[390px]' : 'bottom-3 md:bottom-4 md:left-4 md:w-[390px]') : 'md:left-4 md:w-[390px]'}`}>
