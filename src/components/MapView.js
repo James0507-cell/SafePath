@@ -50,7 +50,60 @@ export default forwardRef(function MapView({ places = [], onRouteUpdate }, ref) 
       style: 'mapbox://styles/mapbox/streets-v12',
       center: [0, 0],
       zoom: 2,
+      pitch: 45,
+      bearing: -17.6,
       attributionControl: false
+    });
+
+    map.current.on('style.load', () => {
+      // Add terrain
+      map.current.addSource('mapbox-dem', {
+        'type': 'raster-dem',
+        'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+        'tileSize': 512,
+        'maxzoom': 14
+      });
+      map.current.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
+
+      // Add 3D buildings
+      const layers = map.current.getStyle().layers;
+      const labelLayerId = layers.find(
+        (layer) => layer.type === 'symbol' && layer.layout && layer.layout['text-field']
+      )?.id;
+
+      map.current.addLayer(
+        {
+          'id': 'add-3d-buildings',
+          'source': 'composite',
+          'source-layer': 'building',
+          'filter': ['==', 'extrude', 'true'],
+          'type': 'fill-extrusion',
+          'minzoom': 15,
+          'paint': {
+            'fill-extrusion-color': '#aaa',
+            'fill-extrusion-height': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              15,
+              0,
+              15.05,
+              ['get', 'height']
+            ],
+            'fill-extrusion-base': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              15,
+              0,
+              15.05,
+              ['get', 'min_height']
+            ],
+            'fill-extrusion-opacity': 0.6
+          }
+        },
+        labelLayerId
+      );
     });
 
     // Initialize Directions
