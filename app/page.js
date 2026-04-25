@@ -235,7 +235,7 @@ export default function DashboardPage() {
                                     <div>
                                         <h2 className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">Search</h2>
                                         <p className="mt-1 text-xs text-slate-500">
-                                            {showResultsPanel ? 'Refine your search and browse nearby matches.' : 'Search for locations and expand this panel into results.'}
+                                            Refine your search and browse nearby matches.
                                         </p>
                                     </div>
                                     {showResultsPanel && (
@@ -279,13 +279,6 @@ export default function DashboardPage() {
 
                             {showResultsPanel && (
                                 <>
-                                    <div className="flex items-center justify-between border-b border-slate-200/70 px-5 py-4">
-                                        <div>
-                                            <h2 className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">Results</h2>
-                                            <p className="mt-1 text-xs text-slate-500">{places.length} places found</p>
-                                        </div>
-                                    </div>
-
                                     <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 overscroll-contain">
                                         {places.length > 0 ? (
                                             <div className="flex flex-col gap-3">
@@ -423,14 +416,16 @@ export default function DashboardPage() {
                     {selectedPlace && (
                         <div className="pointer-events-none absolute inset-x-3 bottom-3 top-[45%] z-50 md:inset-x-auto md:bottom-4 md:left-[418px] md:top-4 md:w-[440px]">
                             <div className="pointer-events-auto flex h-full flex-col overflow-hidden border backdrop-blur-xl" style={panelShellStyle}>
-                                <div className="flex items-center justify-between border-b border-slate-200/70 px-5 py-4">
-                                    <div>
+                                <div className="border-b border-slate-200/70 px-5 py-4">
+                                    <div className="flex items-center justify-between">
                                         <h2 className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">Details</h2>
-                                        <p className="mt-1 text-sm font-semibold text-slate-900">{selectedPlace.name}</p>
+                                        <button onClick={() => setSelectedPlace(null)} className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-400 transition hover:text-slate-700">
+                                            <X size={18} />
+                                        </button>
                                     </div>
-                                    <button onClick={() => setSelectedPlace(null)} className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-400 transition hover:text-slate-700">
-                                        <X size={18} />
-                                    </button>
+                                    <div className="mt-0 text-center">
+                                        <p className="text-sm font-semibold text-slate-900">{selectedPlace.name}</p>
+                                    </div>
                                 </div>
 
                                 <div className="px-4 pt-4">
