@@ -15,7 +15,9 @@ import {
     Clock,
     Phone,
     Globe,
-    X
+    X,
+    Bell,
+    User
 } from 'lucide-react';
 import { createClient } from '@/src/lib/supabaseClient';
 import MapView from '@/src/components/MapView';
@@ -193,26 +195,31 @@ export default function DashboardPage() {
 
     return (
         <div className="flex flex-col md:flex-row h-[100dvh] bg-white text-slate-800 font-sans overflow-hidden">
-            <aside className="hidden md:flex w-[72px] flex-col bg-white border-r border-slate-200 shrink-0 z-30">
-                <div className="h-16 flex items-center justify-center border-b border-slate-100">
-                    <div className="bg-slate-900 p-1.5 rounded-lg"><Shield className="text-white" size={20} /></div>
+            <aside className="hidden md:flex w-[72px] flex-col bg-white border-r border-slate-200 shrink-0 z-30 justify-between">
+                <div>
+                    <div className="h-16 flex items-center justify-center border-b border-slate-100">
+                        <div className="bg-slate-900 p-1.5 rounded-lg"><Shield className="text-white" size={20} /></div>
+                    </div>
+                    <nav className="py-6 flex flex-col items-center gap-2">
+                        {navItems.map((item) => (
+                            <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-[60px] py-3 rounded-xl flex flex-col items-center gap-1 ${activeTab === item.id ? 'bg-slate-100' : 'text-slate-400'}`}>
+                                <item.icon size={20} />
+                                <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
+                            </button>
+                        ))}
+                    </nav>
                 </div>
-                <nav className="flex-1 py-6 flex flex-col items-center gap-2">
-                    {navItems.map((item) => (
-                        <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-[60px] py-3 rounded-xl flex flex-col items-center gap-1 ${activeTab === item.id ? 'bg-slate-100' : 'text-slate-400'}`}>
-                            <item.icon size={20} />
-                            <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
-                        </button>
-                    ))}
-                </nav>
+                <div className="py-6 flex flex-col items-center gap-4">
+                    <button className="text-slate-400 hover:text-slate-600">
+                        <Bell size={20} />
+                    </button>
+                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+                        <User size={16} />
+                    </div>
+                </div>
             </aside>
 
             <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-                <header className="h-16 bg-white border-b border-slate-200 flex items-center px-4 justify-between shrink-0 z-20">
-                    <div className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">Control Map</div>
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold">{user?.email?.charAt(0).toUpperCase()}</div>
-                </header>
-
                 <main className="relative flex-1 overflow-hidden bg-slate-100 font-sans">
                     <div className="absolute inset-0">
                         <MapView ref={mapRef} places={places} />
