@@ -41,3 +41,10 @@ body {
   margin-top: env(safe-area-inset-top);
 }
 
+/* Hide Mapbox Directions UI on mobile */
+@media (max-width: 768px) {
+  .mapboxgl-ctrl-directions {
+    display: none !important;
+  }
+}
+

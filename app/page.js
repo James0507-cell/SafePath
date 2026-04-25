@@ -257,8 +257,16 @@ export default function DashboardPage() {
                     </nav>
 
                     {/* Search and Results Panel */}
-                    <div className={`pointer-events-none absolute inset-x-3 top-3 z-40 transition-all duration-300 ${showResultsPanel ? (selectedPlace ? 'bottom-[calc(48%+0.75rem)] md:bottom-4 md:left-4 md:w-[390px]' : 'bottom-3 md:bottom-4 md:left-4 md:w-[390px]') : 'md:left-4 md:w-[390px]'}`}>
-                        <div className={`pointer-events-auto flex flex-col overflow-hidden border backdrop-blur-xl transition-all duration-300 ${showResultsPanel ? 'h-full min-h-0' : ''}`} style={panelShellStyle}>
+                    <div className={`pointer-events-none absolute z-40 transition-all duration-300 ${
+                        showResultsPanel 
+                            ? 'inset-x-0 top-16 bottom-0 md:inset-x-auto md:left-4 md:top-4 md:bottom-4 md:w-[390px]' 
+                            : 'inset-x-3 top-3 md:inset-x-auto md:left-4 md:top-4 md:w-[390px]'
+                    }`}>
+                        <div className={`pointer-events-auto flex flex-col overflow-hidden border backdrop-blur-xl transition-all duration-300 ${
+                            showResultsPanel 
+                                ? 'h-full min-h-0 !rounded-t-[32px] !rounded-b-none md:!rounded-[var(--panel-radius)]' 
+                                : ''
+                        }`} style={panelShellStyle}>
                             <div className="border-b border-slate-200/70 px-5 py-4">
                                 <div className="flex items-start justify-between gap-4">
                                     <div>
@@ -443,8 +451,8 @@ export default function DashboardPage() {
 
                     {/* Detailed Place Panel */}
                     {selectedPlace && (
-                        <div className="pointer-events-none absolute inset-x-3 bottom-3 top-[45%] z-50 md:inset-x-auto md:bottom-4 md:left-[418px] md:top-4 md:w-[440px]">
-                            <div className="pointer-events-auto flex h-full flex-col overflow-hidden border backdrop-blur-xl" style={panelShellStyle}>
+                        <div className="pointer-events-none absolute z-50 transition-all duration-300 inset-x-0 top-16 bottom-0 md:inset-x-auto md:bottom-4 md:left-[418px] md:top-4 md:w-[440px]">
+                            <div className="pointer-events-auto flex h-full flex-col overflow-hidden border backdrop-blur-xl !rounded-t-[32px] !rounded-b-none md:!rounded-[var(--panel-radius)]" style={panelShellStyle}>
                                 <div className="border-b border-slate-200/70 px-5 py-4">
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">Details</h2>
