@@ -11,6 +11,7 @@ import {
     Search,
     Star,
     MapPin,
+    Pin,
     Clock,
     Phone,
     Globe,
@@ -326,21 +327,36 @@ export default function DashboardPage() {
                                                                         </div>
                                                                     )}
                                                                     </div>
-                                                                    <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        if (mapRef.current && place.latitude && place.longitude) {
-                                                                            mapRef.current.setRoute(place.latitude, place.longitude);
-                                                                        }
-                                                                    }}
-                                                                    className={`mt-3 inline-flex rounded-full px-4 py-1.5 text-[11px] font-semibold tracking-wide transition ${
-                                                                        selectedPlace?.name === place.name
-                                                                            ? 'bg-white/20 text-white hover:bg-white/30'
-                                                                            : 'bg-slate-900 text-white hover:bg-slate-700'
-                                                                    }`}
-                                                                    >
-                                                                    Directions
-                                                                    </button>
+                                                                    <div className="flex gap-2">
+                                                                        <button
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                if (mapRef.current && place.latitude && place.longitude) {
+                                                                                    mapRef.current.setRoute(place.latitude, place.longitude);
+                                                                                }
+                                                                            }}
+                                                                            className={`mt-3 inline-flex items-center justify-center rounded-full p-2 text-white transition ${
+                                                                                selectedPlace?.name === place.name
+                                                                                    ? 'bg-white/20 hover:bg-white/30'
+                                                                                    : 'bg-slate-900 hover:bg-slate-700'
+                                                                            }`}
+                                                                        >
+                                                                            <MapPin size={16} />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                // Pin logic here
+                                                                            }}
+                                                                            className={`mt-3 inline-flex items-center justify-center rounded-full p-2 text-white transition ${
+                                                                                selectedPlace?.name === place.name
+                                                                                    ? 'bg-white/20 hover:bg-white/30'
+                                                                                    : 'bg-slate-900 hover:bg-slate-700'
+                                                                            }`}
+                                                                        >
+                                                                            <Pin size={16} />
+                                                                        </button>
+                                                                    </div>
 
                                                                     <p className={`mt-2 line-clamp-2 text-xs ${selectedPlace?.name === place.name ? 'text-white/75' : 'text-slate-500'}`}>
                                                                     {place.address}
