@@ -186,11 +186,11 @@ export default function DashboardPage() {
     };
 
     const panelCardStyle = {
-        borderRadius: 'var(--panel-card-radius)',
+        borderRadius: `${Math.max(panelRadius - 6, 16)}px`,
     };
 
     const panelPillStyle = {
-        borderRadius: 'var(--panel-pill-radius)',
+        borderRadius: `${Math.max(panelRadius - 12, 14)}px`,
     };
 
     return (
@@ -262,20 +262,41 @@ export default function DashboardPage() {
                             ? 'inset-x-0 top-16 bottom-0 md:inset-x-auto md:left-4 md:top-4 md:bottom-4 md:w-[390px]' 
                             : 'inset-x-3 top-3 md:inset-x-auto md:left-4 md:top-4 md:w-[390px]'
                     }`}>
-                        <div className={`pointer-events-auto flex flex-col overflow-hidden border backdrop-blur-xl transition-all duration-300 ${
+                        <div className={`pointer-events-auto flex flex-col overflow-hidden transition-all duration-300 ${
                             showResultsPanel 
-                                ? 'h-full min-h-0 !rounded-t-[32px] !rounded-b-none md:!rounded-[var(--panel-radius)]' 
-                                : ''
-                        }`} style={panelShellStyle}>
-                            <div className="border-b border-slate-200/70 px-5 py-4">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div>
-                                        <h2 className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">Search</h2>
-                                        <p className="mt-1 text-xs text-slate-500">
-                                            Refine your search and browse nearby matches.
-                                        </p>
-                                    </div>
-                                    {showResultsPanel && (
+                                ? 'border backdrop-blur-xl h-full min-h-0 !rounded-t-[32px] !rounded-b-none md:!rounded-[var(--panel-radius)] bg-[var(--panel-surface)]' 
+                                : 'bg-transparent border-none'
+                        }`} style={showResultsPanel ? panelShellStyle : {}}>
+                            
+                            {!showResultsPanel ? (
+                                <div className="px-5 py-6">
+                                    <form onSubmit={handleSearch}>
+                                        <div className="relative" style={panelPillStyle}>
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                            <input
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                type="text"
+                                                placeholder="Search locations..."
+                                                className="w-full border border-slate-200 bg-white pl-10 pr-24 py-3 text-sm text-slate-800 shadow-[0_10px_28px_rgba(15,23,42,0.06)] focus:outline-hidden rounded-full"
+                                                style={panelPillStyle}
+                                            />
+                                            <button
+                                                type="submit"
+                                                aria-label="Search locations"
+                                                className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center bg-slate-900 text-white transition hover:bg-slate-800 rounded-full"
+                                                style={panelPillStyle}
+                                            >
+                                                <Search size={16} />
+                                            </button>                                        </div>
+                                    </form>
+                                </div>
+                            ) : (
+                                <div className="border-b border-slate-200/70 px-5 py-4">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">
+                                            Results
+                                        </h2>
                                         <button
                                             onClick={() => {
                                                 setHasSearched(false);
@@ -284,35 +305,33 @@ export default function DashboardPage() {
                                                 setCurrentPage(1);
                                                 setHasMore(true);
                                             }}
-                                            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/80 bg-white/80 text-slate-400 transition hover:text-slate-700"
+                                            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-400 transition hover:text-slate-700"
                                         >
-                                            <X size={16} />
-                                        </button>
-                                    )}
-                                </div>
-
-                                <form onSubmit={handleSearch} className="mt-4">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                        <input
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            type="text"
-                                            placeholder="Search locations..."
-                                            className="w-full border border-slate-200/80 bg-white/80 pl-10 pr-24 py-3 text-sm text-slate-800 shadow-[0_10px_28px_rgba(15,23,42,0.06)] focus:outline-hidden"
-                                            style={panelPillStyle}
-                                        />
-                                        <button
-                                            type="submit"
-                                            aria-label="Search locations"
-                                            className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center bg-slate-900 text-white transition hover:bg-slate-800"
-                                            style={panelPillStyle}
-                                        >
-                                            <Search size={16} />
+                                            <X size={18} />
                                         </button>
                                     </div>
-                                </form>
-                            </div>
+                                    <form onSubmit={handleSearch}>
+                                        <div className="relative" style={panelPillStyle}>
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                            <input
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                type="text"
+                                                placeholder="Search locations..."
+                                                className="w-full border border-slate-200 bg-white pl-10 pr-24 py-3 text-sm text-slate-800 shadow-[0_10px_28px_rgba(15,23,42,0.06)] focus:outline-hidden rounded-full"
+                                                style={panelPillStyle}
+                                            />
+                                            <button
+                                                type="submit"
+                                                aria-label="Search locations"
+                                                className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center bg-slate-900 text-white transition hover:bg-slate-800 rounded-full"
+                                                style={panelPillStyle}
+                                            >
+                                                <Search size={16} />
+                                            </button>                                        </div>
+                                    </form>
+                                </div>
+                            )}
 
                             {showResultsPanel && (
                                 <>
