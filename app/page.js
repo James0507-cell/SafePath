@@ -466,7 +466,7 @@ export default function DashboardPage() {
                                 </div>
 
                                 <div className="px-4 pt-4">
-                                    <div className="inline-flex border border-slate-200 bg-slate-100/80 p-1" style={panelPillStyle}>
+                                    <div className="inline-flex p-1">
                                         <button
                                             onClick={() => setActiveDetailTab('overview')}
                                             className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
