@@ -15,6 +15,7 @@ import {
     Clock,
     Phone,
     Globe,
+    HelpCircle,
     X,
     Bell,
     User
@@ -214,6 +215,9 @@ export default function DashboardPage() {
                     <button className="text-slate-400 hover:text-slate-600">
                         <Bell size={20} />
                     </button>
+                    <button className="text-slate-400 hover:text-slate-600">
+                        <HelpCircle size={20} />
+                    </button>
                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
                         <User size={16} />
                     </div>
@@ -226,10 +230,15 @@ export default function DashboardPage() {
                     <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200">
                         <User size={18} />
                     </div>
-                    <button className="relative text-slate-400 hover:text-slate-600 transition-colors">
-                        <Bell size={20} />
-                        <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
-                    </button>
+                    <div className="flex items-center gap-4">
+                        <button className="relative text-slate-400 hover:text-slate-600 transition-colors">
+                            <Bell size={20} />
+                            <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
+                        </button>
+                        <button className="text-slate-400 hover:text-slate-600 transition-colors">
+                            <HelpCircle size={20} />
+                        </button>
+                    </div>
                 </header>
 
                 <main className="relative flex-1 overflow-hidden bg-slate-100 font-sans">
@@ -240,22 +249,21 @@ export default function DashboardPage() {
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.48),_transparent_28%),linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.16))]" />
 
                     {/* Mobile Floating Dock */}
-                    <nav className="fixed md:hidden bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white/80 backdrop-blur-2xl border border-white/50 p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 mb-safe" style={{ borderRadius: '20px' }}>
+                    <nav className="fixed md:hidden bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-slate-900 border border-slate-800 p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.2)] z-50 mb-safe" style={{ borderRadius: '20px' }}>
                         {navItems.map((item) => (
-                            <button 
-                                key={item.id} 
-                                onClick={() => setActiveTab(item.id)} 
+                            <button
+                                key={item.id}
+                                onClick={() => setActiveTab(item.id)}
                                 className={`flex items-center justify-center w-11 h-11 rounded-[14px] transition-all duration-300 ${
-                                    activeTab === item.id 
-                                        ? 'bg-slate-900 text-white shadow-md' 
-                                        : 'text-slate-400 hover:bg-slate-100/50'
+                                    activeTab === item.id
+                                        ? 'bg-white text-slate-900 shadow-md'
+                                        : 'text-slate-400 hover:text-white'
                                 }`}
                             >
                                 <item.icon size={20} className={activeTab === item.id ? 'scale-105' : ''} />
                             </button>
                         ))}
                     </nav>
-
                     {/* Search and Results Panel */}
                     <div className={`pointer-events-none absolute z-40 transition-all duration-300 ${
                         showResultsPanel 
